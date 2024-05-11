@@ -11,12 +11,6 @@ import java.util.stream.Collectors;
  */
 public class FactoryUtils {
 
-    public static void main(String[] args) throws InstantiationException, IllegalAccessException {
-        TableSourceFactory factory = createTableSource("kafka");
-        TableSource tableSource = factory.createTableSource();
-        tableSource.open();
-    }
-
     public static TableSourceFactory createTableSource(String factoryName) throws InstantiationException, IllegalAccessException {
         Class<?> interfaceClass = TableFactory.class;
         Reflections reflections = new Reflections("");
