@@ -17,45 +17,64 @@
   -->
 
 <configuration>
-    <property name="CONSOLE_LOG_PATTERN"
-              value="%yellow(%d{yyyy-MM-dd HH:mm:ss.SSS}) [%blue(%thread)] %highlight(%-5level) %green(%logger{60}) %blue(%file:%line) %X{sourceThread} - %cyan(%msg%n)"/>
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <!--            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{60} %X{sourceThread} - %msg%n</pattern>-->
-            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
-            <!-- 设置字符集 -->
-            <charset>UTF-8</charset>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{60} %X{sourceThread} - %msg%n</pattern>
         </encoder>
+    </appender>
+
+    <appender name="rolling" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>/Users/kino/works/kino/flink-study/flink-study/log/log-file.log</file>
+        <append>false</append>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <fileNamePattern>/Users/kino/works/kino/flink-study/flink-study/log/log-file.log.%i</fileNamePattern>
+            <minIndex>1</minIndex>
+            <maxIndex>10</maxIndex>
+        </rollingPolicy>
+
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>10MB</maxFileSize>
+        </triggeringPolicy>
+
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <pattern>
+                    <pattern>
+                        {
+                        "time": "%date{yyyy-MM-dd HH:mm:ss.SSS}",
+                        "log_level": "%level",
+                        "type":"${LOG_TYPE}",
+                        "podname":"${HOSTNAME}",
+                        "namespace":"${NAMESPACE}",
+                        "jobname":"${JOB_NAME}",
+                        "message": "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{60} %X{sourceThread} - %msg%n",
+                        "statck_trace":"%exception{5}"
+                        }
+                    </pattern>
+                </pattern>
+            </providers>
+        </encoder>
+
     </appender>
 
     <!-- This affects logging for both user code and Flink -->
     <root level="INFO">
         <appender-ref ref="console"/>
+        <appender-ref ref="rolling"/>
     </root>
 
     <!-- Uncomment this if you want to only change Flink's logging -->
-    <!--<logger name="org.apache.flink" level="INFO">-->
-    <!--<appender-ref ref="console"/>-->
-    <!--</logger>-->
+    <!--<logger name="org.apache.flink" level="INFO"/>-->
 
     <!-- The following lines keep the log level of common libraries/connectors on
          log level INFO. The root logger does not override this. You have to manually
          change the log levels here. -->
-    <logger name="akka" level="INFO">
-        <appender-ref ref="console"/>
-    </logger>
-    <logger name="org.apache.kafka" level="INFO">
-        <appender-ref ref="console"/>
-    </logger>
-    <logger name="org.apache.hadoop" level="INFO">
-        <appender-ref ref="console"/>
-    </logger>
-    <logger name="org.apache.zookeeper" level="INFO">
-        <appender-ref ref="console"/>
-    </logger>
+    <logger name="akka" level="INFO"/>
+    <logger name="org.apache.kafka" level="INFO"/>
+    <logger name="org.apache.hadoop" level="INFO"/>
+    <logger name="org.apache.zookeeper" level="INFO"/>
 
     <!-- Suppress the irrelevant (wrong) warnings from the Netty channel handler -->
-    <logger name="org.apache.flink.shaded.akka.org.jboss.netty.channel.DefaultChannelPipeline" level="ERROR">
-        <appender-ref ref="console"/>
-    </logger>
+    <logger name="org.jboss.netty.channel.DefaultChannelPipeline" level="ERROR"/>
 </configuration>
